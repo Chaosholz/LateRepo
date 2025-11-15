@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<AssemblyName>LateRepo</AssemblyName>
+		<Version>0.0.3</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Reference Include="0Harmony">
+	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\0Harmony.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Assembly-CSharp">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Assembly-CSharp.dll</HintPath>
+	  </Reference>
+	  <Reference Include="BepInEx">
+	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\BepInEx.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Facepunch.Steamworks.Win64">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
+	  </Reference>
+	  <Reference Include="MonoMod.RuntimeDetour">
+	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Photon3Unity3D">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Photon3Unity3D.dll</HintPath>
+	  </Reference>
+	  <Reference Include="PhotonRealtime">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\PhotonRealtime.dll</HintPath>
+	  </Reference>
+	  <Reference Include="PhotonUnityNetworking">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\PhotonUnityNetworking.dll</HintPath>
+	  </Reference>
+	  <Reference Include="UnityEngine">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.dll</HintPath>
+	  </Reference>
+	  <Reference Include="UnityEngine.CoreModule">
+	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+</Project>
