@@ -22,9 +22,11 @@ This mod should work with other mods, such as:
 
 ## 🧭 Planned Features
 
-- Joining **while inside the shop**  
-- Joining **during an active level**  
-- Both features will be toggleable through the config file
+- LateJoin **for public lobbies**
+- LateJoin **while inside the shop**
+- LateJoin **during an active level**
+- Better password skip
+- All features will be configurable through the config file
 
 ---
 
