@@ -10,7 +10,7 @@ namespace LateRepo {
     public class Plugin : BaseUnityPlugin {
         public const string ModGUID = "chaos.holz.laterepo";
         public const string ModName = "LateRepo";
-        public const string ModVersion = "1.2.3";
+        public const string ModVersion = "1.4.3";
         private static Harmony _harmony = new(ModName);
         internal static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource(ModName);
 
