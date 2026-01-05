@@ -31,7 +31,7 @@ namespace LateRepo {
             PasswordSkip = Config.Bind("Lobby Settings", "Passwort Skip", true, "Is it true it automatically bypass the password input screen");
             PasswordSet = Config.Bind("Lobby Settings", "SetPasswort", "", "Enter the password you want for your private lobby. If it’s empty, no password will be set. This only works if Password Skip is true.");
 
-            LateRepoCore.InitializeHooks();
+            LateJoinPatch.InitializeHooks();
             PatchAllStuff();
 
             logger.LogInfo("[LateRepo] erfolgreich geladen!");
@@ -39,6 +39,8 @@ namespace LateRepo {
 
         private void PatchAllStuff() {
             _harmony.PatchAll(typeof(PlayerNameCheckerUpdatePatch));
+            _harmony.PatchAll(typeof(MenuPageEscPatch));
+
             if (PickRegion.Value) {
                 _harmony.PatchAll(typeof(MenuPageRegionPatch));
             }

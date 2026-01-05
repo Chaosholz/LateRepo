@@ -6,9 +6,11 @@ using Photon.Realtime;
 using System;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace LateRepo.Patches {
-    internal static class LateRepoCore {
+    internal static class LateJoinPatch {
         // --- Felder für Photon intern ---
         private static readonly FieldInfo removeFilterFieldInfo = AccessTools.Field(typeof(PhotonNetwork), "removeFilter");
         private static readonly FieldInfo keyByteSevenFieldInfo = AccessTools.Field(typeof(PhotonNetwork), "keyByteSeven");
@@ -21,27 +23,29 @@ namespace LateRepo.Patches {
         private static Hook levelGenHook;
         private static Hook startHook;
 
+        // --- Variablen ---
+        public static bool canJoin;
 
         // === Initialisierung ===
         public static void InitializeHooks() {
             changeLevelHook = new Hook(
                 AccessTools.Method(typeof(RunManager), "ChangeLevel"),
-                typeof(LateRepoCore).GetMethod(nameof(ChangeLevelHook))
+                typeof(LateJoinPatch).GetMethod(nameof(ChangeLevelHook))
             );
 
             spawnHook = new Hook(
                 AccessTools.Method(typeof(PlayerAvatar), "Spawn"),
-                typeof(LateRepoCore).GetMethod(nameof(SpawnHook))
+                typeof(LateJoinPatch).GetMethod(nameof(SpawnHook))
             );
 
             levelGenHook = new Hook(
                 AccessTools.Method(typeof(LevelGenerator), "Start"),
-                typeof(LateRepoCore).GetMethod(nameof(LevelGeneratorHook))
+                typeof(LateJoinPatch).GetMethod(nameof(LevelGeneratorHook))
             );
 
             startHook = new Hook(
                 AccessTools.Method(typeof(PlayerAvatar), "Start"),
-                typeof(LateRepoCore).GetMethod(nameof(PlayerAvatarStartHook))
+                typeof(LateJoinPatch).GetMethod(nameof(PlayerAvatarStartHook))
             );
         }
 
@@ -65,17 +69,16 @@ namespace LateRepo.Patches {
 
             orig.Invoke(self, _completedLevel, false, _changeLevelType);
 
-            bool canJoin = SemiFunc.RunIsLobbyMenu() || SemiFunc.RunIsLobby();
+            canJoin = SemiFunc.RunIsLobbyMenu() || SemiFunc.RunIsLobby();
 
             if (canJoin) {
                 SteamManager.instance.UnlockLobby(true);
+
                 Plugin.logger.LogInfo($"[LateRepo] Lobbystatus geändert: offen");
             } else {
                 SteamManager.instance.LockLobby();
+                PhotonNetwork.CurrentRoom.IsOpen = false;
             }
-
-            PhotonNetwork.CurrentRoom.IsOpen = canJoin;
-
         }
 
 
@@ -96,7 +99,6 @@ namespace LateRepo.Patches {
             orig.Invoke(self);
         }
 
-
         // --- PlayerAvatar Start ---
         public static void PlayerAvatarStartHook(Action<PlayerAvatar> orig, PlayerAvatar self) {
             orig.Invoke(self);
@@ -106,7 +108,6 @@ namespace LateRepo.Patches {
             }
             self.photonView.RPC("LoadingLevelAnimationCompletedRPC", RpcTarget.AllBuffered);
         }
-
 
         // --- Cache Cleanup ---
         private static void ClearPhotonCache(PhotonView photonView) {
@@ -118,10 +119,102 @@ namespace LateRepo.Patches {
                 removeFilter![keyByteSeven] = photonView.InstantiationId;
                 serverCleanOptions!.CachingOption = EventCaching.RemoveFromRoomCache;
 
-                raiseEventInternalMethodInfo.Invoke(null, new object[] { (byte)202, removeFilter, serverCleanOptions, SendOptions.SendReliable });
+                raiseEventInternalMethodInfo.Invoke(null, [(byte)202, removeFilter, serverCleanOptions, SendOptions.SendReliable]);
             } catch (Exception ex) {
                 Plugin.logger.LogWarning($"[LateRepo] ClearPhotonCache Fehler: {ex.Message}");
             }
         }
     }
+
+    // --- Escape Invite Button ---
+
+    [HarmonyPatch(typeof(MenuPageEsc))]
+    internal static class MenuPageEscPatch {
+
+        // --- Variablen ---
+        private static GameObject inviteButton;
+
+        [HarmonyPatch(typeof(MenuPageEsc), "Start")]
+        [HarmonyPostfix]
+        private static void MenuPageStartPatch(MenuPageEsc __instance) {
+            if (__instance == null)
+                return;
+
+            // Schon erstellt?
+            if (inviteButton != null)
+                return;
+
+            // MAIN MENU Button Temp
+            MenuButton mainMenuBtn = FindButtonByLabel(__instance, "MAIN MENU");
+            if (mainMenuBtn == null) {
+                Plugin.logger.LogWarning("[LateRepo] MAIN MENU Button nicht gefunden.");
+                return;
+            }
+
+            // Klonen
+            inviteButton = UnityEngine.Object.Instantiate(
+                mainMenuBtn.gameObject,
+                mainMenuBtn.transform.parent
+            );
+
+            // Popup entfernen
+            var popup = inviteButton.GetComponent<MenuButtonPopUp>();
+            if (popup != null)
+                UnityEngine.Object.Destroy(popup);
+
+            // Text setzen
+            var tmp = inviteButton.GetComponentInChildren<TextMeshProUGUI>(true);
+            tmp?.text = "INVITE";
+
+            var menuBtn = inviteButton.GetComponent<MenuButton>();
+            menuBtn?.buttonTextString = "INVITE";
+
+            // Click-Event
+            var unityBtn = inviteButton.GetComponent<Button>();
+            unityBtn.onClick = new Button.ButtonClickedEvent();
+            unityBtn.onClick.AddListener(() => {
+                SteamManager.instance.OpenSteamOverlayToInvite();
+            });
+
+            // Position unter MAIN MENU
+            RectTransform mainRT = mainMenuBtn.GetComponent<RectTransform>();
+            RectTransform newRT = inviteButton.GetComponent<RectTransform>();
+
+            float gap = 4f;
+            float yStep = mainRT.rect.height + gap;
+
+            newRT.anchoredPosition = mainRT.anchoredPosition + new Vector2(0f, -yStep);
+
+            inviteButton.transform.SetSiblingIndex(
+                mainMenuBtn.transform.GetSiblingIndex() + 1
+            );
+
+            Plugin.logger.LogInfo("[LateRepo] Invite Button erstellt.");
+        }
+
+        // --- Invite Button Sichtbar ---
+        [HarmonyPatch(typeof(MenuPageEsc), "Update")]
+        [HarmonyPostfix]
+        private static void MenuPageUpdatePatch() {
+            if (inviteButton == null)
+                return;
+
+            bool shouldShow = LateJoinPatch.canJoin;
+
+            if (inviteButton.activeSelf != shouldShow)
+                inviteButton.SetActive(shouldShow);
+        }
+
+        private static MenuButton FindButtonByLabel(MonoBehaviour root, string label) {
+            foreach (var btn in root.GetComponentsInChildren<MenuButton>(true)) {
+                var tmp = btn.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (tmp != null &&
+                    string.Equals(tmp.text?.Trim(), label, StringComparison.OrdinalIgnoreCase)) {
+                    return btn;
+                }
+            }
+            return null;
+        }
+    }
 }
+

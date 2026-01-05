@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
-using System.Reflection;
 using UnityEngine;
+
+// --- Auto Regionsauswahl ---
 
 namespace LateRepo.Patches {
     [HarmonyPatch(typeof(MenuPageRegions))]
@@ -20,6 +21,8 @@ namespace LateRepo.Patches {
         }
     }
 
+    // --- PopUp Schließer ---
+
     [HarmonyPatch(typeof(MenuManager))]
     internal static class PopUpPatch {
         [HarmonyPatch(typeof(MenuManager), "PagePopUpTwoOptions")]
@@ -32,28 +35,28 @@ namespace LateRepo.Patches {
             string option1Text,
             string option2Text,
             bool richText) {
-            // PRIVATE GAME POPUP
+            // PRIVATE GAME PopUp
             if (Plugin.PlayGamePopup.Value) {
                 if (IsPrivateGamePopup(popUpHeader, popUpText)) {
                     menuButtonPopUp.option1Event?.Invoke();
                     return false;
                 }
 
-                // PUBLIC GAME POPUP
+                // PUBLIC GAME PopUp
                 if (IsPublicGamePopup(popUpHeader, popUpText)) {
                     menuButtonPopUp.option1Event?.Invoke();
                     return false;
                 }
             }
             if (Plugin.StartGamePopup.Value) {
-                // START GAME POPUP
+                // START GAME PopUp
                 if (IsStartGamePopup(popUpHeader, popUpText)) {
                     menuButtonPopUp.option1Event?.Invoke();
                     return false;
                 }
             }
             if (Plugin.LoadSavePopup.Value) {
-                // LOAD SAVE POPUP
+                // LOAD SAVE PopUp
                 if (IsLoadSavePopup(popUpHeader, popUpText)) {
                     menuButtonPopUp.option1Event?.Invoke();
                     return false;
@@ -98,9 +101,12 @@ namespace LateRepo.Patches {
         }
     }
 
+    // --- Auto Password ---
+
     [HarmonyPatch(typeof(MenuPagePassword))]
     internal static class MenuPagePasswordPatch {
 
+        // --- Variablen ---
         private static bool passwordAlreadySet = false;
 
         [HarmonyPatch(typeof(MenuPagePassword), "Update")]
@@ -120,8 +126,6 @@ namespace LateRepo.Patches {
                     passwordAlreadySet = true;
 
                     Plugin.logger.LogInfo("[LateRepo] Automatisches Passwort gesetzt: " + autoPassword);
-
-
                 }
                 __instance.ConfirmButton();
             }
