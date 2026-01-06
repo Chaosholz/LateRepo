@@ -1,17 +1,23 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-// --- Auto Regionsauswahl ---
-
 namespace LateRepo.Patches {
+
+    // === Region Patch ===
+
     [HarmonyPatch(typeof(MenuPageRegions))]
     internal static class MenuPageRegionPatch {
+        // --- Variablen --- //
+        public static bool isPublicGame;
+
+        // --- Auto Regionsauswahl ---
         [HarmonyPatch(typeof(MenuPageRegions), "Start")]
         [HarmonyPrefix]
         private static void MenuPageRegionStartPatch(MenuPageRegions __instance) {
             __instance.PickRegion("");
         }
 
+        // --- Public Game zurück zum Main Menü
         [HarmonyPatch(typeof(MenuPagePublicGameChoice), "ExitPage")]
         [HarmonyPrefix]
         private static bool PublicExitPagePatch() {
@@ -21,10 +27,13 @@ namespace LateRepo.Patches {
         }
     }
 
-    // --- PopUp Schließer ---
+    // === PopUp Schließer ===
 
     [HarmonyPatch(typeof(MenuManager))]
     internal static class PopUpPatch {
+        // --- Variablen --- //
+        public static bool isPublicGame = false;
+
         [HarmonyPatch(typeof(MenuManager), "PagePopUpTwoOptions")]
         [HarmonyPrefix]
         private static bool PagePopUpTwoOptionsPatch(
@@ -35,6 +44,18 @@ namespace LateRepo.Patches {
             string option1Text,
             string option2Text,
             bool richText) {
+           
+            // Game auswahl saver 
+            if (IsPrivateGamePopup(popUpHeader, popUpText)) {
+                isPublicGame = false;
+                Plugin.logger.LogWarning("PRIVATE");
+            } else if (IsPublicGamePopup(popUpHeader, popUpText)) {
+                isPublicGame = true;
+                Plugin.logger.LogWarning("PUBLIC");
+            } else {
+                return true;
+            }
+
             // PRIVATE GAME PopUp
             if (Plugin.PlayGamePopup.Value) {
                 if (IsPrivateGamePopup(popUpHeader, popUpText)) {
@@ -101,12 +122,12 @@ namespace LateRepo.Patches {
         }
     }
 
-    // --- Auto Password ---
+    // === Auto Password ===
 
     [HarmonyPatch(typeof(MenuPagePassword))]
     internal static class MenuPagePasswordPatch {
 
-        // --- Variablen ---
+        // --- Variablen --- //
         private static bool passwordAlreadySet = false;
 
         [HarmonyPatch(typeof(MenuPagePassword), "Update")]
@@ -133,7 +154,7 @@ namespace LateRepo.Patches {
 
         [HarmonyPatch(typeof(MenuPagePassword), "Start")]
         [HarmonyPrefix]
-        private static void ResetFlag() {
+        private static void PasswortStartPatch() {
             passwordAlreadySet = false;
         }
     }

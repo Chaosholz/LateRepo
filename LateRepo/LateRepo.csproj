@@ -10,40 +10,40 @@
 
 	<ItemGroup>
 	  <Reference Include="0Harmony">
-	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\0Harmony.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\AppData\Roaming\Thunderstore Mod Manager\DataFolder\REPO\profiles\Test\BepInEx\core\0Harmony.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Assembly-CSharp">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Assembly-CSharp.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\Assembly-CSharp.dll</HintPath>
 	  </Reference>
 	  <Reference Include="BepInEx">
-	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\BepInEx.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\AppData\Roaming\Thunderstore Mod Manager\DataFolder\REPO\profiles\Test\BepInEx\core\BepInEx.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Facepunch.Steamworks.Win64">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
 	  </Reference>
 	  <Reference Include="MonoMod.RuntimeDetour">
-	    <HintPath>..\..\..\..\..\..\..\Modding\REPO\profiles\Test\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\AppData\Roaming\Thunderstore Mod Manager\DataFolder\REPO\profiles\Test\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Photon3Unity3D">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Photon3Unity3D.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\Photon3Unity3D.dll</HintPath>
 	  </Reference>
 	  <Reference Include="PhotonRealtime">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\PhotonRealtime.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\PhotonRealtime.dll</HintPath>
 	  </Reference>
 	  <Reference Include="PhotonUnityNetworking">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\PhotonUnityNetworking.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\PhotonUnityNetworking.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Unity.TextMeshPro">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\Unity.TextMeshPro.dll</HintPath>
 	  </Reference>
 	  <Reference Include="UnityEngine">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.dll</HintPath>
 	  </Reference>
 	  <Reference Include="UnityEngine.CoreModule">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
 	  </Reference>
 	  <Reference Include="UnityEngine.UI">
-	    <HintPath>G:\SteamLibrary\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.UI.dll</HintPath>
+	    <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.UI.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 

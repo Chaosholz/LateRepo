@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using TMPro;
 
 namespace LateRepo.Patches {
+    // === Late Join code ===
     internal static class LateJoinPatch {
         // --- Felder für Photon intern ---
         private static readonly FieldInfo removeFilterFieldInfo = AccessTools.Field(typeof(PhotonNetwork), "removeFilter");
@@ -26,7 +27,7 @@ namespace LateRepo.Patches {
         // --- Variablen ---
         public static bool canJoin;
 
-        // === Initialisierung ===
+        // --- Initialisierung ---
         public static void InitializeHooks() {
             changeLevelHook = new Hook(
                 AccessTools.Method(typeof(RunManager), "ChangeLevel"),
@@ -73,11 +74,23 @@ namespace LateRepo.Patches {
 
             if (canJoin) {
                 SteamManager.instance.UnlockLobby(true);
-
+                PhotonNetwork.CurrentRoom.IsOpen = true;
                 Plugin.logger.LogInfo($"[LateRepo] Lobbystatus geändert: offen");
+                if (!PopUpPatch.isPublicGame) {
+                    return;
+                } else {
+                    PhotonNetwork.CurrentRoom.IsVisible = true;
+                    GameManager.instance.SetConnectRandom(true);
+                }
             } else {
                 SteamManager.instance.LockLobby();
                 PhotonNetwork.CurrentRoom.IsOpen = false;
+                if (!PopUpPatch.isPublicGame) {
+                    return;
+                } else {
+                    PhotonNetwork.CurrentRoom.IsVisible = false;
+                    GameManager.instance.SetConnectRandom(false);
+                }
             }
         }
 
@@ -121,12 +134,12 @@ namespace LateRepo.Patches {
 
                 raiseEventInternalMethodInfo.Invoke(null, [(byte)202, removeFilter, serverCleanOptions, SendOptions.SendReliable]);
             } catch (Exception ex) {
-                Plugin.logger.LogWarning($"[LateRepo] ClearPhotonCache Fehler: {ex.Message}");
+                Plugin.logger.LogError($"[LateRepo] ClearPhotonCache Fehler: {ex.Message}");
             }
         }
     }
 
-    // --- Escape Invite Button ---
+    // === Escape Invite Button ===
 
     [HarmonyPatch(typeof(MenuPageEsc))]
     internal static class MenuPageEscPatch {
