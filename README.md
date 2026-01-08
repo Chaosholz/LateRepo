@@ -1,14 +1,14 @@
-# 🧩 LateJoin Mod for R.E.P.O. v0.3.0
+# 🧩 LateJoin Mod for R.E.P.O. v0.3.2
 
 **LateRepo** is a LateJoin mod for **R.E.P.O.**  
-It allows players to join an active lobby **after leaving the shop**,  
+It allows players to join an active lobby **during the shop phase and after exiting the shop.**,  
 without requiring the host to restart the entire session.
 
 ---
 
 ## 🎮 Detailed Explanation
 
-After leaving the shop, the game will automatically reopen the lobby.  
+After leaving the shop or while in the shop, the game will automatically reopen the lobby. 
 Players who join later can connect during this phase, before the next level starts.
 
 The mod is **server-side** and only required by the **host**.  
@@ -22,8 +22,6 @@ This mod should work with other mods, such as:
 
 ## 🧭 Planned Features
 
-- LateJoin **for public lobbies**
-- LateJoin **while inside the shop**
 - LateJoin **during an active level**
 - Better password skip
 - All features will be configurable through the config file
@@ -85,7 +83,7 @@ If you experience issues:
 
 ---
 
-# 🧩 LateJoin mod für R.E.P.O. v0.3.0
+# 🧩 LateJoin mod für R.E.P.O. v0.3.2
 
 **LateRepo** ist eine LateJoin-Mod für **R.E.P.O.**,  
 die es Spielern erlaubt, einer laufenden Lobby **nach dem Shop** beizutreten,  
@@ -95,7 +93,7 @@ ohne dass der Host die Lobby neu starten muss.
 
 ## 🎮 Genauere Erklärung
 
-Nach dem Verlassen des Shops öffnet das Spiel die Lobby automatisch neu.  
+Nach dem Verlassen des Shops oder im Shop öffnet das Spiel die Lobby automatisch neu.  
 Spieler, die später beitreten möchten, können dann beitreten, bevor das nächste Level gestartet wird.
 
 Die Mod ist serverseitig und wird nur vom Host benötigt.  
@@ -109,7 +107,6 @@ Diese Mod sollte mit anderen Mods kompatibel sein, zum Beispiel:
 
 ## 🧭 Geplante Funktionen
 
-- Beitreten **im Shop**  
 - Beitreten **während eines laufenden Levels**  
 - Beide sollen dann in den Configs ein- und ausschaltbar sein.
 
