@@ -70,7 +70,7 @@ namespace LateRepo.Patches {
 
             orig.Invoke(self, _completedLevel, false, _changeLevelType);
 
-            canJoin = SemiFunc.RunIsLobbyMenu() || SemiFunc.RunIsLobby();
+            canJoin = SemiFunc.RunIsLobbyMenu() || SemiFunc.RunIsLobby() || (SemiFunc.RunIsShop() && Plugin.JoinShop.Value);
 
             if (canJoin) {
                 SteamManager.instance.UnlockLobby(true);
@@ -79,6 +79,7 @@ namespace LateRepo.Patches {
                 if (!PopUpPatch.isPublicGame) {
                     return;
                 } else {
+                    Plugin.logger.LogInfo("Public");
                     PhotonNetwork.CurrentRoom.IsVisible = true;
                     GameManager.instance.SetConnectRandom(true);
                 }
@@ -90,6 +91,7 @@ namespace LateRepo.Patches {
                 } else {
                     PhotonNetwork.CurrentRoom.IsVisible = false;
                     GameManager.instance.SetConnectRandom(false);
+                    Plugin.logger.LogInfo("nicht Public");
                 }
             }
         }
@@ -140,91 +142,109 @@ namespace LateRepo.Patches {
     }
 
     // === Escape Invite Button ===
-
     [HarmonyPatch(typeof(MenuPageEsc))]
     internal static class MenuPageEscPatch {
-
-        // --- Variablen ---
-        private static GameObject inviteButton;
-
-        [HarmonyPatch(typeof(MenuPageEsc), "Start")]
+        [HarmonyPatch("Start")]
         [HarmonyPostfix]
         private static void MenuPageStartPatch(MenuPageEsc __instance) {
-            if (__instance == null)
-                return;
+            if (!Plugin.JoinButton.Value) return;
+            if (!LateJoinPatch.canJoin) return;
+            if (__instance == null) return;
 
-            // Schon erstellt?
-            if (inviteButton != null)
-                return;
-
-            // MAIN MENU Button Temp
-            MenuButton mainMenuBtn = FindButtonByLabel(__instance, "MAIN MENU");
+            // MAIN MENU Button finden
+            MenuButton mainMenuBtn = FindButtonByLabel(__instance.transform, "MAIN MENU");
             if (mainMenuBtn == null) {
                 Plugin.logger.LogWarning("[LateRepo] MAIN MENU Button nicht gefunden.");
                 return;
             }
 
+            Transform parent = mainMenuBtn.transform.parent;
+            if (parent == null) return;
+
+            if (FindButtonByLabel(parent, "INVITE") != null) return;
+
             // Klonen
-            inviteButton = UnityEngine.Object.Instantiate(
-                mainMenuBtn.gameObject,
-                mainMenuBtn.transform.parent
-            );
+            GameObject inviteGO = UnityEngine.Object.Instantiate(mainMenuBtn.gameObject, parent);
 
-            // Popup entfernen
-            var popup = inviteButton.GetComponent<MenuButtonPopUp>();
-            if (popup != null)
-                UnityEngine.Object.Destroy(popup);
+            var popup = inviteGO.GetComponent<MenuButtonPopUp>();
+            if (popup != null) UnityEngine.Object.Destroy(popup);
 
-            // Text setzen
-            var tmp = inviteButton.GetComponentInChildren<TextMeshProUGUI>(true);
-            tmp?.text = "INVITE";
+            var tmp = inviteGO.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (tmp != null) {
+                tmp.text = "INVITE";
+                ButtonToTMPText(inviteGO, tmp, padX: 2f, padY: 2f);
+            }
 
-            var menuBtn = inviteButton.GetComponent<MenuButton>();
+            // Optional
+            var menuBtn = inviteGO.GetComponent<MenuButton>();
             menuBtn?.buttonTextString = "INVITE";
 
-            // Click-Event
-            var unityBtn = inviteButton.GetComponent<Button>();
-            unityBtn.onClick = new Button.ButtonClickedEvent();
-            unityBtn.onClick.AddListener(() => {
-                SteamManager.instance.OpenSteamOverlayToInvite();
-            });
+            var unityBtn = inviteGO.GetComponent<Button>();
+            if (unityBtn != null) {
+                unityBtn.onClick.RemoveAllListeners();
+                unityBtn.onClick.AddListener(() => {
+                    if (SteamManager.instance != null)
+                        SteamManager.instance.OpenSteamOverlayToInvite();
+                    else
+                        Plugin.logger.LogWarning("[LateRepo] SteamManager.instance ist null.");
+                });
+            }
 
-            // Position unter MAIN MENU
-            RectTransform mainRT = mainMenuBtn.GetComponent<RectTransform>();
-            RectTransform newRT = inviteButton.GetComponent<RectTransform>();
+            inviteGO.transform.SetSiblingIndex(mainMenuBtn.transform.GetSiblingIndex() + 1);
 
-            float gap = 4f;
-            float yStep = mainRT.rect.height + gap;
+            var vlg = parent.GetComponent<VerticalLayoutGroup>();
+            var hlg = parent.GetComponent<HorizontalLayoutGroup>();
 
-            newRT.anchoredPosition = mainRT.anchoredPosition + new Vector2(0f, -yStep);
+            if (vlg == null && hlg == null) {
+                RectTransform mainRT = mainMenuBtn.GetComponent<RectTransform>();
+                RectTransform newRT = inviteGO.GetComponent<RectTransform>();
 
-            inviteButton.transform.SetSiblingIndex(
-                mainMenuBtn.transform.GetSiblingIndex() + 1
-            );
+                if (mainRT != null && newRT != null) {
+                    float gap = 4f;
+                    float yStep = mainRT.rect.height + gap;
+                    newRT.anchoredPosition = mainRT.anchoredPosition + new Vector2(0f, -yStep);
 
-            Plugin.logger.LogInfo("[LateRepo] Invite Button erstellt.");
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(newRT);
+                }
+            }
+        }
+        private static void ButtonToTMPText(GameObject buttonGO, TextMeshProUGUI tmp, float padX = 2f, float padY = 2f) {
+            if (buttonGO == null || tmp == null) return;
+
+            tmp.ForceMeshUpdate();
+
+            Vector2 pref = tmp.GetPreferredValues(tmp.text);
+
+            RectTransform btnRT = buttonGO.GetComponent<RectTransform>();
+            if (btnRT == null) return;
+
+            float targetW = pref.x + padX;
+            float targetH = Mathf.Max(btnRT.sizeDelta.y, pref.y + padY);
+
+            btnRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetW);
+            btnRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetH);
+
+            RectTransform textRT = tmp.GetComponent<RectTransform>();
+            if (textRT != null) {
+                textRT.anchorMin = new Vector2(0f, 0f);
+                textRT.anchorMax = new Vector2(1f, 1f);
+                textRT.offsetMin = Vector2.zero;
+                textRT.offsetMax = Vector2.zero;
+            }
+
+            var le = buttonGO.GetComponent<LayoutElement>();
+            if (le != null) {
+                le.preferredWidth = targetW;
+                le.preferredHeight = targetH;
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(btnRT);
         }
 
-        // --- Invite Button Sichtbar ---
-        [HarmonyPatch(typeof(MenuPageEsc), "Update")]
-        [HarmonyPostfix]
-        private static void MenuPageUpdatePatch() {
-            if (inviteButton == null)
-                return;
-
-            bool shouldShow = LateJoinPatch.canJoin;
-
-            if (inviteButton.activeSelf != shouldShow)
-                inviteButton.SetActive(shouldShow);
-        }
-
-        private static MenuButton FindButtonByLabel(MonoBehaviour root, string label) {
+        private static MenuButton FindButtonByLabel(Transform root, string label) {
             foreach (var btn in root.GetComponentsInChildren<MenuButton>(true)) {
                 var tmp = btn.GetComponentInChildren<TextMeshProUGUI>(true);
-                if (tmp != null &&
-                    string.Equals(tmp.text?.Trim(), label, StringComparison.OrdinalIgnoreCase)) {
+                if (tmp != null && string.Equals(tmp.text?.Trim(), label, StringComparison.OrdinalIgnoreCase))
                     return btn;
-                }
             }
             return null;
         }

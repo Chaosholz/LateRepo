@@ -7,8 +7,6 @@ namespace LateRepo.Patches {
 
     [HarmonyPatch(typeof(MenuPageRegions))]
     internal static class MenuPageRegionPatch {
-        // --- Variablen --- //
-        public static bool isPublicGame;
 
         // --- Auto Regionsauswahl ---
         [HarmonyPatch(typeof(MenuPageRegions), "Start")]
@@ -31,6 +29,7 @@ namespace LateRepo.Patches {
 
     [HarmonyPatch(typeof(MenuManager))]
     internal static class PopUpPatch {
+
         // --- Variablen --- //
         public static bool isPublicGame = false;
 
@@ -48,12 +47,8 @@ namespace LateRepo.Patches {
             // Game auswahl saver 
             if (IsPrivateGamePopup(popUpHeader, popUpText)) {
                 isPublicGame = false;
-                Plugin.logger.LogWarning("PRIVATE");
             } else if (IsPublicGamePopup(popUpHeader, popUpText)) {
                 isPublicGame = true;
-                Plugin.logger.LogWarning("PUBLIC");
-            } else {
-                return true;
             }
 
             // PRIVATE GAME PopUp
@@ -156,6 +151,32 @@ namespace LateRepo.Patches {
         [HarmonyPrefix]
         private static void PasswortStartPatch() {
             passwordAlreadySet = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(MoonUI))]
+    internal static class MoonUIPatch {
+        [HarmonyPatch(typeof(MoonUI), "Check")]
+        [HarmonyPostfix]
+        private static void MoonUICheckPatch(MoonUI __instance) {
+            var stateObj = AccessTools.Field(typeof(MoonUI), "state").GetValue(__instance);
+            var state = (MoonUI.State)stateObj;
+
+            if (state <= MoonUI.State.None) return;
+
+            AccessTools.Field(typeof(MoonUI), "skip").SetValue(__instance, true);
+            __instance.SetState(MoonUI.State.None);
+        }
+    }
+
+    [HarmonyPatch(typeof(LevelGenerator))]
+    internal static class LevelGeneratorPatch {
+        [HarmonyPatch(typeof(LevelGenerator), "Start")]
+        [HarmonyPrefix]
+        private static void LevelGeneratorStartPatch() {
+            if (SemiFunc.IsSplashScreen() && RunManager.instance && DataDirector.instance && DataDirector.instance.SettingValueFetch(DataDirector.Setting.SplashScreenCount) == 1) {
+                RunManager.instance.levelCurrent = RunManager.instance.levelMainMenu;
+            }
         }
     }
 }
